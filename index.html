@@ -162,18 +162,7 @@
                     align: 'center',
                     wordWrap: { width: W - 60 }
                 }).setOrigin(0.5);
-
-                // Goal Text (for the info popup)
-                this.goalText = this.add.text(W / 2, H / 2, GOAL_TEXT, {
-                    fontSize: '20px',
-                    color: '#FFF',
-                    backgroundColor: 'rgba(0,0,0,0.8)',
-                    padding: { x: 20, y: 20 },
-                    fontFamily: 'Courier Prime',
-                    align: 'center',
-                    wordWrap: { width: W - 80 }
-                }).setOrigin(0.5).setVisible(false);
-
+                
                 // Credit Text
                 this.creditText = this.add.text(W / 2, H - 20, 'Game concept by C.J. Cato', {
                     fontSize: '12px',
@@ -188,9 +177,7 @@
                 this.startButton = this.createButton(W / 2, H - 120, 'Start Journey', () => this.startGame());
                 this.nextDayBtn = this.createButton(W / 2, H - 120, 'Next Day', () => this.triggerEvent());
                 this.restartBtn = this.createButton(W / 2, H - 180, 'Restart', () => this.scene.restart());
-                this.goalButton = this.createButton(W - 60, 30, 'Goal', () => this.toggleGoal());
-                this.goalButton.setOrigin(1, 0);
-
+                
                 // Set initial visibility
                 this.hideAllUI();
                 this.titleText.setVisible(true);
@@ -223,7 +210,6 @@
                 this.startButton.setVisible(false);
                 this.nextDayBtn.setVisible(false);
                 this.restartBtn.setVisible(false);
-                this.goalButton.setVisible(false);
                 this.creditText.setVisible(false);
                 this.choicesContainer.removeAll(true);
             }
@@ -248,20 +234,14 @@
                 this.maxDays = 30;
                 this.maxEvents = 60;
                 this.gameOver = false;
-                this.goalText.setVisible(false);
-
+                
                 // Show playing UI
                 this.resourceText.setVisible(true);
-                this.goalButton.setVisible(true);
                 this.eventText.setText('Your journey begins. What will the road bring today?');
                 this.eventText.setVisible(true);
                 this.nextDayBtn.setVisible(true);
                 this.creditText.setVisible(true);
                 this.updateResourceText();
-            }
-
-            toggleGoal() {
-                this.goalText.setVisible(!this.goalText.visible);
             }
 
             updateResourceText() {
@@ -328,7 +308,6 @@
             endGame(result) {
                 this.gameOver = true;
                 this.hideAllUI();
-                this.goalButton.setVisible(true);
                 this.creditText.setVisible(true);
 
                 if (result === 'win') {
@@ -358,7 +337,11 @@
             }
         };
 
-        const game = new Phaser.Game(config);
+        // Wrap the game initialization in an onload event to ensure the DOM is ready.
+        window.onload = function() {
+            console.log("Starting the Phaser game on window load...");
+            const game = new Phaser.Game(config);
+        };
 
     </script>
 </body>
