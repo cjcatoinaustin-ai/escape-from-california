@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en" class="antialiased">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Escape from California – Expanded</title>
+    <!-- Tailwind CSS for modern, responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Courier+Prime:wght@400;700&display=swap');
+        body {
+            /* Use a dark theme for a cinematic feel */
+            background-color: #111827;
+            color: #E5E7EB;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+        }
+        canvas {
+            border: 2px solid #374151;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            background-color: #1F2937;
+        }
+    </style>
+    <!-- Phaser game engine -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
+</head>
+<body>
+    <div id="game-container" class="w-full h-full max-w-4xl max-h-screen"></div>
+
+    <script type="module">
+        /**************** ESCAPE FROM CALIFORNIA – EXPANDED BUILD ****************/
+
+        // Game Constants and Utility Functions
+        const RESOURCES = { gas: 40, cash: 500, avocado: 10, wifi: 5 };
+        const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        const cloneRes = () => JSON.parse(JSON.stringify(RESOURCES));
+
+        // 170 Unique Event Texts (50 new ones added)
+        const EVENT_TEXTS = [
+            'You hit a surprise avocado-toast tax checkpoint.', 'Fire-season smoke clouds the highway.', 'A rogue HOA demands you repaint the U-Haul wheels beige.', 'Gas hits record highs at an off-brand station.', 'A yoga flash-mob blocks the on-ramp.', 'Tech Bro insists on a 30-minute pitch-deck stop.', 'A rental e-scooter pile-up causes a detour.', 'Surfer Dude spots “perfect waves”—traffic halts.', 'Influencer needs golden-hour footage—delay!', 'A wildfire forces evacuation of Route 1.', 'Crypto convention near Santa Clara gridlocks I-5.', 'Housing protest shuts down your exit.', 'Earthquake shakes vending machines onto the road.', 'Unexpected toll lane appears—cash only.', 'Carpool-lane camera flags “too many kombuchas” as passengers.', 'Pop-up vintage market lures party off course.', 'Street artist offers an NFT mural for an outrageous fee.', 'Tesla on Autopilot brakes abruptly ahead.', 'Blazing sun melts asphalt—overheat risk!', 'An escrow officer demands proof of residency.', 'You find a "free" couch—takes 2 hours to load.', 'Gas-station smoothie machine is out—morale drops.', 'Local radio warns of rent surge—panic!', 'Bay-Area exit ramp closed for drone-show rehearsal.', 'Feral peacocks chase the U-Haul in Arcadia.', 'Farmers-market signs tempt Hipster Barista.', 'An influencer livestreams your license plate—privacy concern.', 'Giant "Now Hiring" billboard distracts Tech Bro.', 'Driverless taxi stalls in the middle lane.', 'HOA citation: “Parking too hopeful.”', 'Mandatory mindfulness checkpoint requires deep breaths.', 'Street-taco truck offers discount for avocado trade.', 'Golden Gate Bridge closed for sunset selfie-fest.', 'Alpaca escape from petting-zoo clogs traffic.', 'Surfer Dude swaps radio to lo-fi beats—morale +1.', 'Pop-up psychic predicts doom—morale –1.', 'Gas station accepts Dogecoin only.', 'Overworked Nurse volunteers roadside—lose time.', 'Secret-menu coffee stop boosts morale +2.', 'Golf-cart parade crawls across intersection.', 'Charity 5K reroutes the coastal highway.', 'Festival parking surge price: $60 flat fee.', 'Drone delivery test drops packages on the hood.', 'Beach cleanup volunteers wave signs—aww.', 'Census worker blocks lane with clipboard.', 'Surprise fog blinds visibility—speed cut.', 'Sidewalk robots swarm the crosswalk.', 'Farmer protests almond-milk shortage.', 'Water-rationing checkpoint asks for proof of low-flow showerhead.', 'Bike-lane activists form a human barrier.', 'Pop-up kombucha tasting on freeway shoulder.', 'HOA letter demands “spiritually neutral” bumper-sticker removal.', 'Tech Bro lost his crypto wallet—search for hours.', 'California-roll-only sushi stop.', 'Wild parrots steal avocado stash.', 'Palm-tree trimming blocks all but one lane.', 'Surf competition reroutes PCH.', 'Retro arcade lures Influencer for content.', 'Giant art installation detour through desert.', 'Weather app just says “Carmageddon.”', 'Santa Ana winds push the U-Haul sideways.', 'Pop-up vaccine booth offers free Wi-Fi.', 'Tax auditor sets up speed trap.', 'Microbrew fest: free entry, hidden costs.', 'Cactus puncture—gas used cleaning the mess.', 'Trooper inspects kombucha growlers.', 'Luxury EV charging queue blocks exit.', 'Karaoke contest at gas station offers $30 prize.', 'Influencer dance-off delays schedule.', 'Surfer Dude picks up stray skateboarders.', 'Flash-mob musical detours traffic.', 'Nurse leads roadside yoga—morale boost.', 'Hedge-fund retreat buys entire motel—no vacancy.', 'Art car from Burning Man idles ahead.', 'Crypto-mining rig overheats rest-stop power.', 'Ash rain from distant fire clogs filters.', 'Dumpster diver trades vintage jeans for gas.', 'Realtor sandwich board blocks sidewalk.', 'Illegal fireworks stand distracts driver.', 'Coffee shop only accepts reusable cups—delay.', 'Carpool karaoke challenge waives toll.', 'Historic mission tour detours route—educational!', 'Napa wine spill makes road slick.', 'Silicon-Valley exec helicopter landing closes lanes.', 'Celebrity sighting halts traffic for selfies.', 'Earth-Day parade blocks boulevard.', 'Farm-to-table truck charges $25 for toast.', 'Podcast recording requests engine off—5-min delay.', 'Tiny-house flash sale distracts Tech Bro.', 'Pop-up charging station requires new app.', 'Surprise snow on Grapevine Pass.', 'High-speed-rail construction detour.', 'Desert dust storm sands windshield.', 'Local ordinance bans honking—fine risk.', 'HOA insists on eco decal permit.', 'State-fair livestock escape onto road.', 'Influencer puppy photo-shoot spills onto shoulder.', 'Volunteer highway cleanup slows lane.', 'Mass exodus jam mirrors your own journey.', 'Tech Bro stops to tweet “Leaving CA 🚚💨”.', 'Oversize solar-panel load blocks passing.', 'Fruit stand samples distract driver.', 'Pop-up VR demo hijacks rest area.', 'Comedy-improv troupe bus breaks down ahead.', 'College move-in weekend spike.', 'Beach foghorn malfunction deafens driver.', 'Vegan cheese giveaway stampede.', 'Emergency drought drill closes hydrants.', 'Sideshows spinning doughnuts block intersection.', 'Mountain-lion sighting halts hikers and cars.', 'Air-quality alert requires mask stop.', 'Tech-conference swag drop parachutes onto road.', 'Roller-skate protest demands free transit.', 'Flash freeze of avocado futures—Tech Bro panics.', 'Influencer loses ring-light—emergency Target stop.', 'Roadrunner delivery robot races the U-Haul.', 'Lava-lamp festival heatpocalypse warning.',
+            // 50 NEW EVENTS
+            'Vegan food truck breaks down, creating a traffic jam of people arguing over oat vs almond milk.',
+            'Mandatory DEI training seminar for all drivers in the carpool lane.',
+            'A group of LARPers in full gear are recreating the "Battle of Berkeley" on the freeway shoulder.',
+            'A protest against "disposable fashion" has blocked the road with piles of fast-fashion clothes.',
+            'A wellness influencer is live-streaming a sound bath in a rest stop, causing a backup.',
+            'A cryptocurrency mining operation in an abandoned trailer park is causing a power grid failure.',
+            'A pop-up art installation made of reclaimed plastic bottles is blocking your exit.',
+            'A celebrity chef is filming a documentary about sustainable foraging, and their film crew is in your way.',
+            'A protest demanding reparations for the Donner Party has stopped traffic.',
+            'A group of urban farmers are holding a silent disco in the middle of a major intersection.',
+            'The road is closed for an impromptu silent retreat.',
+            'A tech mogul is test-flying a personal eVTOL, causing a no-fly zone and a major delay.',
+            'You are asked to donate to a GoFundMe for a homeless tech startup.',
+            'A dog walking business has lost control of 20 labradoodles, who are now running loose on the freeway.',
+            'The local radio station is playing a 24-hour loop of ambient whale songs, making everyone fall asleep.',
+            'A mandatory meditation session is being held at a roadside rest stop, blocking all parking.',
+            'A pop-up "rage room" has been set up, causing a traffic jam of people waiting to smash things.',
+            'An artist collective has painted the road with non-toxic, vegan paint, which is now melting in the sun.',
+            'A "sustainable living" commune has set up a roadblock to check if you have a composting system.',
+            'The road is closed for a drone light show celebrating a new startup IPO.',
+            'A group of climate activists have formed a human chain to block all fossil-fuel powered vehicles.',
+            'You get stuck behind a caravan of tiny homes on their way to a "radical self-reliance" festival.',
+            'A pop-up gluten-free bakery is giving away free sourdough, causing a massive line of cars.',
+            'A community garden has expanded into the shoulder of the highway, slowing traffic.',
+            'A viral TikTok challenge has caused a flash mob of people doing a choreographed dance in the street.',
+            'The road is closed for a "puppy-powered" dog-sled race, but the puppies are tired.',
+            'A new app for "conscious commuting" has launched, causing everyone to drive at 5 mph.',
+            'An impromptu drum circle has formed at a gas station, forcing you to find another one.',
+            'A protest against "mansplaining" is blocking traffic, with protestors holding up signs that say "Listen up!".',
+            'A famous comedian is doing a pop-up show at a rest stop, and a crowd has formed.',
+            'A road is closed for a "gender-reveal party" involving an exploding volcano.',
+            'A group of performance artists is doing a piece about the "existential dread of traffic".',
+            'A pop-up "cuddle puddle" has been set up in the middle of a park, and the traffic is backed up for miles.',
+            'A "plant-based" car wash is using kombucha instead of soap, causing a traffic jam.',
+            'A group of "spiritual healers" has set up a roadblock to "cleanse your aura" before you can pass.',
+            'A viral podcast has called for a mass exodus, and everyone is now driving in the same direction.',
+            'An app for "conscious capitalism" has redirected all traffic to a single, overpriced coffee shop.',
+            'A protest against "fast food" has blocked the drive-thru of a local burger joint.',
+            'A group of "digital nomads" has set up a mobile co-working space on the side of the road.',
+            'A protest against "cultural appropriation" has shut down a local taco stand, causing a traffic jam.',
+            'A new startup has launched a "pet-powered" ride-sharing service, causing chaos on the road.',
+            'A group of "empaths" has set up a roadblock to "feel your pain" before you can pass.',
+            'A viral video of a "dancing traffic cone" has caused a traffic jam of people trying to film it.',
+            'A pop-up "wellness retreat" has taken over a local gas station, offering massages and green juice.',
+            'A protest against "toxic masculinity" has blocked a local gym.',
+            'A group of "eco-warriors" has set up a roadblock to check if your car is "carbon neutral".',
+            'A viral "meditation challenge" has caused a traffic jam of people sitting in their cars with their eyes closed.',
+            'A pop-up "mindful eating" festival has taken over a local park, and the traffic is backed up for miles.',
+            'A new app for "sustainable dating" has launched, causing everyone to drive to the same organic farm.',
+            'A group of "spiritual alchemists" has set up a roadblock to "transmute your negative energy" before you can pass.'
+        ];
+
+        // Dynamic Option Builder (kept same, it's a good system)
+        function makeOptions() {
+            const pay = randInt(30, 120);
+            const avo = randInt(1, 4);
+            const gas = randInt(4, 12);
+            const wifi = randInt(1, 3);
+            const nft = randInt(20, 60);
+            return [
+                { label: `Pay $${pay} to resolve`, effects: { cash: -pay } },
+                { label: `Trade ${avo} avocado toast (-${avo} avocado)`, effects: { avocado: -avo } },
+                { label: `Floor it! (-${gas} gas)`, effects: { gas: -gas } },
+                { label: `Offer hotspot (-${wifi} Wi-Fi)`, effects: { wifi: -wifi } },
+                { label: `Mint NFT (+$${nft}, -2 Wi-Fi)`, effects: { cash: nft, wifi: -2 } }
+            ];
+        }
+
+        const GOAL_TEXT = 'GOAL:\nEscape California with ≥1 Gas, Cash, and Avocado.\nSurvive 30 days OR 60 events to reach freedom!';
+
+        // Phaser Scene for the Game Logic
+        class MainScene extends Phaser.Scene {
+            constructor() {
+                super('main');
+            }
+
+            // Preload any assets (none for this game, but good practice to have)
+            preload() { }
+
+            create() {
+                this.state = 'start'; // 'start', 'playing', 'end'
+                this.setupGameUI();
+                this.showStartScreen();
+            }
+
+            // Sets up all UI elements but hides most initially
+            setupGameUI() {
+                const { width: W, height: H } = this.scale;
+
+                // Title
+                this.titleText = this.add.text(W / 2, H / 4, 'Escape from California', {
+                    fontSize: '36px',
+                    color: '#FFF',
+                    fontFamily: 'Courier Prime',
+                    fontStyle: 'bold',
+                    align: 'center',
+                    wordWrap: { width: W - 100 }
+                }).setOrigin(0.5).setShadow(3, 3, 'rgba(0,0,0,0.5)', 2);
+
+                // Resource Display
+                this.resourceText = this.add.text(W / 2, 50, '', {
+                    fontSize: '18px',
+                    color: '#6EE7B7',
+                    fontFamily: 'Courier Prime',
+                    align: 'center'
+                }).setOrigin(0.5);
+
+                // Event Text
+                this.eventText = this.add.text(W / 2, H / 2, '', {
+                    fontSize: '20px',
+                    color: '#E5E7EB',
+                    fontFamily: 'Courier Prime',
+                    align: 'center',
+                    wordWrap: { width: W - 60 }
+                }).setOrigin(0.5);
+
+                // Goal Text (for the info popup)
+                this.goalText = this.add.text(W / 2, H / 2, GOAL_TEXT, {
+                    fontSize: '20px',
+                    color: '#FFF',
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    padding: { x: 20, y: 20 },
+                    fontFamily: 'Courier Prime',
+                    align: 'center',
+                    wordWrap: { width: W - 80 }
+                }).setOrigin(0.5).setVisible(false);
+
+                // Credit Text
+                this.creditText = this.add.text(W / 2, H - 20, 'Game concept by C.J. Cato', {
+                    fontSize: '12px',
+                    color: '#888',
+                    fontFamily: 'monospace'
+                }).setOrigin(0.5).setVisible(false);
+
+                // Choice Buttons Container
+                this.choicesContainer = this.add.container(W / 2, H / 2 + 80).setDepth(1);
+
+                // Main Buttons
+                this.startButton = this.createButton(W / 2, H - 120, 'Start Journey', () => this.startGame());
+                this.nextDayBtn = this.createButton(W / 2, H - 120, 'Next Day', () => this.triggerEvent());
+                this.restartBtn = this.createButton(W / 2, H - 180, 'Restart', () => this.scene.restart());
+                this.goalButton = this.createButton(W - 60, 30, 'Goal', () => this.toggleGoal());
+                this.goalButton.setOrigin(1, 0);
+
+                // Set initial visibility
+                this.hideAllUI();
+                this.titleText.setVisible(true);
+                this.startButton.setVisible(true);
+            }
+
+            // Helper function to create interactive buttons with consistent style
+            createButton(x, y, text, callback) {
+                const button = this.add.text(x, y, text, {
+                    fontSize: '22px',
+                    backgroundColor: '#10B981',
+                    color: '#000',
+                    padding: { x: 20, y: 10 },
+                    fontFamily: 'Inter',
+                    fontStyle: 'bold',
+                }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+                // Add hover effects for a better user experience
+                button.on('pointerover', () => button.setStyle({ backgroundColor: '#059669' }));
+                button.on('pointerout', () => button.setStyle({ backgroundColor: '#10B981' }));
+                button.on('pointerdown', callback);
+
+                return button;
+            }
+
+            hideAllUI() {
+                this.titleText.setVisible(false);
+                this.resourceText.setVisible(false);
+                this.eventText.setVisible(false);
+                this.startButton.setVisible(false);
+                this.nextDayBtn.setVisible(false);
+                this.restartBtn.setVisible(false);
+                this.goalButton.setVisible(false);
+                this.creditText.setVisible(false);
+                this.choicesContainer.removeAll(true);
+            }
+
+            showStartScreen() {
+                this.hideAllUI();
+                this.state = 'start';
+                this.titleText.setText('Escape from California');
+                this.titleText.setVisible(true);
+                this.eventText.setText('Can you make it to the state line before you run out of resources?');
+                this.eventText.setVisible(true);
+                this.startButton.setVisible(true);
+                this.creditText.setVisible(true);
+            }
+
+            startGame() {
+                this.hideAllUI();
+                this.state = 'playing';
+                this.resources = cloneRes();
+                this.day = 0;
+                this.eventCount = 0;
+                this.maxDays = 30;
+                this.maxEvents = 60;
+                this.gameOver = false;
+                this.goalText.setVisible(false);
+
+                // Show playing UI
+                this.resourceText.setVisible(true);
+                this.goalButton.setVisible(true);
+                this.eventText.setText('Your journey begins. What will the road bring today?');
+                this.eventText.setVisible(true);
+                this.nextDayBtn.setVisible(true);
+                this.creditText.setVisible(true);
+                this.updateResourceText();
+            }
+
+            toggleGoal() {
+                this.goalText.setVisible(!this.goalText.visible);
+            }
+
+            updateResourceText() {
+                this.resourceText.setText(
+                    `Day: ${this.day} of ${this.maxDays} | Events: ${this.eventCount} of ${this.maxEvents}\n` +
+                    `Gas: ${this.resources.gas.toFixed(1)} | Cash: $${this.resources.cash.toFixed(0)} | Avocado: ${this.resources.avocado} | Wi-Fi: ${this.resources.wifi}`
+                );
+            }
+
+            triggerEvent() {
+                if (this.gameOver) return;
+
+                this.day++;
+                this.eventCount++;
+                const event = EVENT_TEXTS[randInt(0, EVENT_TEXTS.length - 1)];
+                const options = makeOptions(); // Now always generates all 5 options
+                this.eventText.setText(event);
+                this.choicesContainer.removeAll(true);
+                this.nextDayBtn.setVisible(false);
+
+                // Create choice buttons with updated style
+                const btnYStart = 0;
+                options.forEach((option, i) => {
+                    const btn = this.add.text(0, btnYStart + i * 50, option.label, {
+                        fontSize: '16px',
+                        backgroundColor: '#6B7280',
+                        color: '#FFF',
+                        padding: { x: 16, y: 8 },
+                        fontFamily: 'Inter',
+                        fontStyle: 'bold'
+                    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+
+                    // Hover effects for choice buttons
+                    btn.on('pointerover', () => btn.setStyle({ backgroundColor: '#4B5563' }));
+                    btn.on('pointerout', () => btn.setStyle({ backgroundColor: '#6B7280' }));
+
+                    btn.on('pointerdown', () => {
+                        this.applyOption(option.effects);
+                        this.choicesContainer.removeAll(true);
+                        this.eventText.setText('You have chosen. Click "Next Day" to continue.');
+                        this.nextDayBtn.setVisible(true);
+                    });
+                    this.choicesContainer.add(btn);
+                });
+
+                this.checkGameOver();
+            }
+
+            applyOption(effects) {
+                for (let key in effects) {
+                    this.resources[key] = Math.max(0, this.resources[key] + effects[key]);
+                }
+                this.updateResourceText();
+            }
+
+            checkGameOver() {
+                if (this.resources.gas < 1 || this.resources.cash < 1 || this.resources.avocado < 1) {
+                    this.endGame('lose');
+                } else if (this.day >= this.maxDays || this.eventCount >= this.maxEvents) {
+                    this.endGame('win');
+                }
+            }
+
+            endGame(result) {
+                this.gameOver = true;
+                this.hideAllUI();
+                this.goalButton.setVisible(true);
+                this.creditText.setVisible(true);
+
+                if (result === 'win') {
+                    this.titleText.setText('Success!');
+                    this.eventText.setText('You made it to freedom! Your party opens a BBQ joint in Texas.');
+                } else {
+                    this.titleText.setText('Game Over!');
+                    this.eventText.setText('You’re stuck in California! Your Tech Bro starts a mindfulness podcast.');
+                }
+
+                this.titleText.setVisible(true);
+                this.eventText.setVisible(true);
+                this.restartBtn.setVisible(true);
+            }
+        }
+
+        // Phaser Game Configuration
+        const config = {
+            type: Phaser.AUTO,
+            parent: 'game-container',
+            scene: MainScene,
+            scale: {
+                mode: Phaser.Scale.RESIZE,
+                autoCenter: Phaser.Scale.CENTER_BOTH,
+                width: 800,
+                height: 600
+            }
+        };
+
+        const game = new Phaser.Game(config);
+
+    </script>
+</body>
+</html>
